@@ -22,7 +22,7 @@ const {Fighter} = require("../class-types/Fighter");
  */
 
 function Player (name, classType) {
-    this.nane = name;
+    this.name = name;
     this.classType = classType;
     this.hitPoints = hpDictionary[classType.baseHPs];
 }
@@ -32,7 +32,7 @@ Player.prototype.determineHPs = function () {
     const newLevelHPs = Math.round(Math.random() * hitDice);
 
     this.hitPoints += newLevelHPs;
-    console.log("New hitpoints are ", this.hitPoints);
+    console.log(`${this.name}'s new hit points are: ${this.hitPoints}`);
 };
 
 const baseFighter = new Fighter();
