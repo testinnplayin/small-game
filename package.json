@@ -11,5 +11,8 @@
     "game"
   ],
   "author": "R.Wood",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
