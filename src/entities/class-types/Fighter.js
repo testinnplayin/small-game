@@ -15,6 +15,7 @@ function Fighter () {
     // These are placeholders
     this.weaponTypes = "all";
     this.armorTypes = "all";
+    this.toHitMelee = "+1/lvl";
 }
 
 /** @exports class-types/Fighter */
