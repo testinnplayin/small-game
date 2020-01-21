@@ -3,13 +3,18 @@
  * @module characters/Player
  * @author R.Wood
  * Date: 18/01/2020
+ * @requires module:attributeModifiers
  * @requires module:hpDictionary
  * @requires module:class-types/Fighter
  */
 
 "use strict";
 
-/** @constant {Object} hpDictionary - hitpoint dictionary - @see module:hpDictionary */
+/** 
+ * @constant {Object} attributeModifiers - attribute modifiers dictionary @see module:attributeModifiers
+ * @constant {Object} hpDictionary - hitpoint dictionary - @see module:hpDictionary
+ */
+const attributeModifiers = require("../../constants/attribute-modifiers").attributeModifiers;
 const hpDictionary = require("../../constants/hp-dictionary").hpDictionary;
 
 /** @constant {Object} Fighter - @see module:class-types/Fighter - for test purposes */
@@ -21,7 +26,7 @@ const {Fighter} = require("../class-types/Fighter");
  * @param {string} classType - the type of class for the new character
  */
 
-function Player (name, classType) {
+function Player (name, classType, str, dex, con, int, wis, cha) {
     this.name = name;
     this.classType = classType;
     this.hitPoints = hpDictionary[classType.baseHPs];
@@ -29,6 +34,13 @@ function Player (name, classType) {
     this.level = 3
     // NOTE: needs strength modifier here
     this.toHitMelee = 0;
+    this.toHitRange = 0;
+    this.strength = str;
+    this.dexterity = dex;
+    this.constitution = con;
+    this.intelligence = int;
+    this.wisdom = wis;
+    this.charisma = cha;
 }
 
 /**
@@ -39,10 +51,12 @@ Player.prototype.determineHPs = function () {
     /**
      * @constant {number} hitDice - the hit die of the Player's character determined by class type
      * @see module:hpDictionary and also look at each class type's baseHPs property
+     * @constant {number} modifier - constitution modifier to hit points - @see module:attributeModifiers
      * @constant {number} newLevelHPs - the new amount of hitpoints
      */
     const hitDice = hpDictionary[this.classType.baseHPs];
-    const newLevelHPs = Math.round(Math.random() * hitDice);
+    const modifier = attributeModifiers[this.constitution];
+    const newLevelHPs = Math.round(Math.random() * hitDice) + modifier;
 
     this.hitPoints += newLevelHPs;
     console.log(`${this.name}'s new hit points are: ${this.hitPoints}`);
@@ -51,8 +65,9 @@ Player.prototype.determineHPs = function () {
 /**
  * @method Player#calculateToHit - calculates the player character's to hit
  * @param {string} toHit - this is a string determining what the character's to hit is by level
+ * @param {number} modifier - the modifier (either strength for melee or dexterity for ranged)
  */
-Player.prototype.calculateToHit = function (toHit) {
+Player.prototype.calculateToHit = function (toHit, modifier) {
     /** @constant {number} level - the level of the player character */
     const level = this.level;
 
@@ -64,17 +79,17 @@ Player.prototype.calculateToHit = function (toHit) {
      */
     switch(toHit) {
         case "+1/lvl":
-            return level;
+            return level + modifier;
         case "+1/2lvls":
-            return (level % 2 === 0) ? level / 2 : 0;
+            return (level % 2 === 0) ? level / 2 + modifier : 0;
         case "+1/3lvls":
-            return (level % 3 === 0) ? level / 3 : 0;
+            return (level % 3 === 0) ? level / 3 + modifier : 0;
         case "+2/3lvls":
-            return (level % 3 === 0) ? level / 3 + 1 : 0;
+            return (level % 3 === 0) ? level / 3 + 1 + modifier : 0;
     }
 };
 
 const baseFighter = new Fighter();
 
-const myChar = new Player("My Char", baseFighter);
+const myChar = new Player("My Char", baseFighter, 18, 16, 17, 10, 10, 4);
 myChar.determineHPs();
