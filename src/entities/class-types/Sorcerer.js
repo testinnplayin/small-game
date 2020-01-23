@@ -34,8 +34,8 @@ const toHitTable = {
 function Sorcerer (name) {
     this.name = name;
     this.baseHPs = "d4";
-    this.weaponTypes = ["halfspear", "hand_crossbow"];
-    this.armorTypes = ["padded", "leather"];
+    this.weaponTypes = ["ammo", "simpleMelee", "simpleRanged"];
+    this.armorTypes = [];
     this.toHitTable = toHitTable;
 }
 

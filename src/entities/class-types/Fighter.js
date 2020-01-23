@@ -36,9 +36,8 @@ const toHitTable = {
  */
 function Fighter () {
     this.baseHPs = "d10";
-    // These are placeholders
-    this.weaponTypes = "all";
-    this.armorTypes = "all";
+    this.weaponTypes = ["ammo", "simpleMelee", "simpleRanged", "martialMelee", "martialRanged"];
+    this.armorTypes = ["light", "medium", "heavy"];
     this.toHitTable = toHitTable;
 }
 
