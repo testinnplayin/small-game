@@ -6,22 +6,29 @@
  */
 
 /** @exports constants/armorList */
-exports.armorList = [
-    "bandedMail",
-    "breastplate",
-    "buckler",
-    "chainShirt",
-    "chainmail",
-    "fullPlate",
-    "halfPlate",
-    "hide",
-    "leather",
-    "padded",
-    "scaleMail",
-    "shieldLarge",
-    "shieldMedium",
-    'shieldSmall',
-    "shieldTower",
-    "splintMail",
-    "studdedLeather"
-]
+exports.armorList = {
+    heavy : [
+        "bandedMail",
+        "fullPlate",
+        "hide",
+        "shieldLarge",
+        "shieldTower",
+        "splintMail"
+    ],
+    light : [
+        "buckler",
+        "chainShirt",
+        "leather",
+        "padded",
+        'shieldSmall',
+        "studdedLeather"
+    ],
+    medium : [
+        "breastplate",
+        "chainmail",
+        "hide",
+        "scaleMail",
+        "shieldMedium",
+        "splintMail"
+    ]
+};
