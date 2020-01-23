@@ -5,6 +5,7 @@
  * Date : 23/01/2020
  * @requires express
  * @requires module:armorController
+ * @requires module:errorHandlers
  */
 
 /** @constant {Object} router - @see expressJS Router documentation */
@@ -13,20 +14,13 @@ const router = require("express").Router();
 /** @constant {Object} armorController - @see module:armorController */
 const armorController = require("../controllers/armor-controller");
 
+/** @constant {Object} errorHandlers - @see module:errorHandlers */
+const errorHandlers = require("../src/helpers/error-handlers");
+
 /** create a new armor type - POST at /api/equipment/armor */
 router.post("/", armorController.createArmor);
 
 
-router.use((err, req, res, next) => {
-    // code for error handling
-    let errStatus = 500;
-
-    if (req.errStatus) {
-        errStatus = req.errStatus;
-    }
-
-    console.error(`[ERROR] at ${req.originalUrl} | ${err.stack}`);
-    return res.status(errStatus).json({ message : err.message });
-});
+router.use(errorHandlers.handleError);
 
 module.exports = router;
