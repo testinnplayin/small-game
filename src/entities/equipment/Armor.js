@@ -37,12 +37,19 @@ const armorSchema = mongoose.Schema({
         default : 0
     },
     price : Number,
-    weight : Number
+    weight : Number,
+    category : {
+        type : String,
+        enum : [
+            "Heavy",
+            "Light",
+            "Medium",
+            "N/A"
+        ]
+    }
 },
 {
     collection : "armor"
 });
 
-const Armor = mongoose.model("Armor", armorSchema);
-
-module.exports = { Armor };
+module.exports = { armorSchema };
