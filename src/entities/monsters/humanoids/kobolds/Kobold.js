@@ -12,14 +12,30 @@
 const { Character } = require("../../../characters/Character");
 
 /** @constant {Object} Kobold - defines a Kobold template */
-const Kobold = new Character("Kobold", "d4", 0, {
-    strength : 6,
-    dexterity : 13,
-    constitution : 11,
-    intelligence : 10,
-    wisdom : 10,
-    charisma : 10
-}, "small");
+const Kobold = new Character(
+    "Kobold", 
+    "d4",
+    0,
+    {
+        strength : 6,
+        dexterity : 13,
+        constitution : 11,
+        intelligence : 10,
+        wisdom : 10,
+        charisma : 10
+    },
+    "small",
+    {
+        armor : "LEATHER"
+    },
+    {
+        naturalAC : 1
+    }
+);
 
-console.log(Kobold.calculateArmorClass());
+Kobold.calculateArmorClass()
+    .then(ac => {
+        console.log("ac ", ac);
+    })
+    .catch(err => console.error(err));
 module.exports = { Kobold };

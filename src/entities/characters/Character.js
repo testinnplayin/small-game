@@ -5,6 +5,9 @@
  * Date : 20/01/2020
  * @requires module:hpDictionary
  * @requires module:attributeModifiers
+ * @requires module:dbConnector
+ * @requires module:errorMessages
+ * @requires module:Armor
  */
 
 "use strict";
@@ -16,15 +19,29 @@
 const attributeModifiers = require("../../constants/attribute-modifiers");
 const hpDictionary = require("../../constants/hp-dictionary").hpDictionary;
 
-/** @constant {string} defaultHD - when no hit die is specified, default to a d8 */
+/** 
+ * @constant {number} baseAC - base armor class
+ * @constant {string} defaultHD - when no hit die is specified, default to a d8
+ */
+const baseAC = 10;
 const defaultHD = "d8";
+
+/** 
+ * @constant {Object} dbConnector - @see module:dbConnector
+ * @constant {Object} errorMessages - @see module:errorMessages
+ */
+const dbConnector = require("../../data-base/db-connector");
+const errorMessages = require("../../constants/error-messages");
+
+/** @constant {Object} armorSchema - @see module:equipment/Armor */
+const { armorSchema } = require("../equipment/Armor");
 
 /**
  * @class Character
  * @param {string=defaultHD} hitDice - hit dice of the character
  * @param {number=0} level - level of the character
  */
-function Character (name, hitDice=defaultHD, level=0, abilities, size) {
+function Character (name, hitDice=defaultHD, level=0, abilities, size, equipment, other) {
     this.name = name;
     this.hitDice = hitDice;
     this.hitPoints = this.determineHPs();
@@ -32,7 +49,8 @@ function Character (name, hitDice=defaultHD, level=0, abilities, size) {
     this.abilities = abilities;
     this.initiative = attributeModifiers.attributeModifiers[this.abilities.dexterity];
     this.size = size;
-    // this.ac = 
+    this.equipment = equipment;
+    this.other = other;
 }
 
 /**
@@ -75,9 +93,40 @@ Character.prototype.determineHPs = function () {
 
 Character.prototype.calculateArmorClass = function () {
     const abilities = Object.assign({}, this.abilities);
+    const equipment = Object.assign({}, this.equipment);
+    const other = Object.assign({}, this.other);
     const modifier = attributeModifiers.attributeModifiers[abilities.dexterity];
-    // add any other special mods + armor here
-    return attributeModifiers.sizeModifiers[this.size] + modifier;
+    
+    let db,
+        natural = 0;
+
+    if (other.naturalAC) {
+        natural = other.naturalAC;
+    }
+
+    return new Promise((resolve, reject) => {
+        dbConnector.connectToDB()
+            .then(database => {
+                if (!database) {
+                    throw new Error(errorMessages.databaseError);
+                }
+
+                db = database;
+
+                const Armor = db.model("Armor", armorSchema);
+
+                return Armor.findOne({ _sys_name : equipment.armor });
+            })
+            .then(armor => {
+                if (!armor) {
+                    throw new Error("cannot find armor");
+                }
+                const ac = baseAC + attributeModifiers.sizeModifiers[this.size] + modifier + armor.armor_bonus + natural;
+                resolve(ac);
+            })
+            .then(() => dbConnector.disconnectFromDB(db))
+            .catch(err => reject(err));
+    });
 };
 
 /** @exports characters/Character */

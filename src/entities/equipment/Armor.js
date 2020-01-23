@@ -19,6 +19,12 @@ const armorSchema = mongoose.Schema({
         required : true,
         unique : true
     },
+    _sys_name : {
+        type : String,
+        uppercase : true,
+        required : true,
+        unique : true
+    },
     /**@property {number} armorSchema.armor_bonus - used to calculated armor bonus */
     armor_bonus : {
         type : Number,
