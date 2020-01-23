@@ -41,16 +41,19 @@ const { armorSchema } = require("../equipment/Armor");
  * @param {string=defaultHD} hitDice - hit dice of the character
  * @param {number=0} level - level of the character
  */
-function Character (name, hitDice=defaultHD, level=0, abilities, size, equipment, other) {
+function Character (name, hitDice=defaultHD, level=0, abilities, size, equipment, other, classType) {
     this.name = name;
     this.hitDice = hitDice;
     this.hitPoints = this.determineHPs();
+    this.toHitMelee = this.determineToHit(abilities.strength);
+    this.toHitRanged = this.determineToHit(abilities.dexterity);
     this.level = level;
     this.abilities = abilities;
     this.initiative = attributeModifiers.attributeModifiers[this.abilities.dexterity];
     this.size = size;
     this.equipment = equipment;
     this.other = other;
+    this.classType = classType;
 }
 
 /**
@@ -91,15 +94,30 @@ Character.prototype.determineHPs = function () {
     return totalHPs;
 };
 
+/**
+ * @method Character.calculateArmorClass - method that calculates armor class asynchronously
+ * @returns {Object} - a Promise; success will send a number to where it is used, error returns an error object
+ */
 Character.prototype.calculateArmorClass = function () {
+    /**
+     * @constant {Object} abilities - shallow copy of the abilities property
+     * @constant {Object} equipment - shallow copy of the equipment property
+     * @constant {Object} other - shallow copy of the other property
+     * @constant {number} modifier - the dexterity modifier
+     */
     const abilities = Object.assign({}, this.abilities);
     const equipment = Object.assign({}, this.equipment);
     const other = Object.assign({}, this.other);
     const modifier = attributeModifiers.attributeModifiers[abilities.dexterity];
     
+    /**
+     * @var {Object=undefined} db - database object
+     * @var {number=0} natural - any natural modifiers are put here
+     */
     let db,
         natural = 0;
 
+    /** if there is any natural armor class modifier then put it in the natural variable */
     if (other.naturalAC) {
         natural = other.naturalAC;
     }
@@ -108,19 +126,24 @@ Character.prototype.calculateArmorClass = function () {
         dbConnector.connectToDB()
             .then(database => {
                 if (!database) {
+                    /** @throws a database error to the console */
                     throw new Error(errorMessages.databaseError);
                 }
 
                 db = database;
 
+                /** @constant {Object} Armor - @see MongooseJS documentation on models */
                 const Armor = db.model("Armor", armorSchema);
 
                 return Armor.findOne({ _sys_name : equipment.armor });
             })
             .then(armor => {
                 if (!armor) {
+                    /** @throws a 404-style message */
                     throw new Error("cannot find armor");
                 }
+
+                /** @constant {number} ac - the armor class */
                 const ac = baseAC + attributeModifiers.sizeModifiers[this.size] + modifier + armor.armor_bonus + natural;
                 resolve(ac);
             })
@@ -128,6 +151,32 @@ Character.prototype.calculateArmorClass = function () {
             .catch(err => reject(err));
     });
 };
+
+/**
+ * @method Character.determineToHit - calculates the to hit
+ * @param {string} ability - either strength (for melee) or dex (for ranged)
+ * @returns {number} - the to hit based on ability modifier, level and class type (and size)
+ */
+Character.prototype.determineToHit = function (ability) {
+    /**
+     * @constant {number} abilityModifier - any ability modifier
+     * @constant {number} sizeMod - any size modifier
+     * @constant {number} level - character's level
+     */
+    const abilityModifier = attributeModifiers.attributeModifiers[ability];
+    const sizeMod = attributeModifiers.sizeModifiers[this.size];
+    const level = this.level;
+
+    /** @var {number[]=[0]} levelMods - level modifiers reliant on class type */
+    let levelMods = [0];
+
+    if (this.classType) {
+        levelMods = this.classType.toHitTable[level];
+    }
+
+    /** an array of modified to hit's */
+    return levelMods.map(lMod => lMod + abilityModifier + sizeMod);
+}
 
 /** @exports characters/Character */
 module.exports = { Character };

@@ -4,12 +4,16 @@
  * @author R.Wood
  * Date: 23/01/2020
  * @requires module:characters/Character
+ * @requires module:class-types/Sorcerer
  */
 
 "use strict";
 
 /** @constant {Object} Character - @see module:characters/Character */
 const { Character } = require("../../../characters/Character");
+
+/** @constant {Object} Sorcerer - @see module:class-types/Sorcerer */
+const { Sorcerer } = require("../../../class-types/Sorcerer");
 
 /** @constant {Object} Kobold - defines a Kobold template */
 const Kobold = new Character(
@@ -26,16 +30,15 @@ const Kobold = new Character(
     },
     "small",
     {
-        armor : "LEATHER"
+        armor : "LEATHER",
+        weapons : ["lightCrossbow", "halfSpear"]
     },
     {
         naturalAC : 1
-    }
+    },
+    new Sorcerer("Kobold Sorcerer")
 );
 
-Kobold.calculateArmorClass()
-    .then(ac => {
-        console.log("ac ", ac);
-    })
-    .catch(err => console.error(err));
+
+
 module.exports = { Kobold };
