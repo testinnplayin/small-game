@@ -26,7 +26,7 @@ const {Fighter} = require("../class-types/Fighter");
  * @param {string} classType - the type of class for the new character
  */
 
-function Player (name, classType, str, dex, con, int, wis, cha) {
+function Player (name, classType, abilities) {
     this.name = name;
     this.classType = classType;
     this.hitPoints = hpDictionary[classType.baseHPs];
@@ -35,12 +35,7 @@ function Player (name, classType, str, dex, con, int, wis, cha) {
     // NOTE: needs strength modifier here
     this.toHitMelee = 0;
     this.toHitRange = 0;
-    this.strength = str;
-    this.dexterity = dex;
-    this.constitution = con;
-    this.intelligence = int;
-    this.wisdom = wis;
-    this.charisma = cha;
+    this.abilities = abilities
 }
 
 /**
@@ -55,7 +50,7 @@ Player.prototype.determineHPs = function () {
      * @constant {number} newLevelHPs - the new amount of hitpoints
      */
     const hitDice = hpDictionary[this.classType.baseHPs];
-    const modifier = attributeModifiers[this.constitution];
+    const modifier = attributeModifiers[this.abilities.constitution];
     const newLevelHPs = Math.round(Math.random() * hitDice) + modifier;
 
     this.hitPoints += newLevelHPs;
@@ -91,5 +86,15 @@ Player.prototype.calculateToHit = function (toHit, modifier) {
 
 const baseFighter = new Fighter();
 
-const myChar = new Player("My Char", baseFighter, 18, 16, 17, 10, 10, 4);
+const myChar = new Player("My Char", baseFighter, {
+    strength : 18,
+    dexterity : 16,
+    constitution : 17,
+    intelligence : 10,
+    wisdom : 10,
+    charisma : 4
+});
 myChar.determineHPs();
+
+/** @exports characters/Player */
+module.exports = { Player };
