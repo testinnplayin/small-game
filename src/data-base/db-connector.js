@@ -27,13 +27,11 @@ const connectionOptions = {
     useNewUrlParser : true,
     useUnifiedTopology : true,
     useFindAndModify : false,
-    useCreateIndex : true,
-    /** @see module:config.databaseName */
-    dbName : config.databaseName
+    useCreateIndex : true
 };
 
 /** @constant {string} DATABASE_ADDRESS - @see module:config */
-const DATABASE_ADDRESS = `${config.databaseUrl}/${config.databasePort}`;
+const DATABASE_ADDRESS = `${config.databaseUrl}:${config.databasePort}/${config.databaseName}`;
 
 /** @exports dbConnector */
 module.exports = {
@@ -42,28 +40,14 @@ module.exports = {
      * @returns {Object} - a Promise
      */
     connectToDB () {
-        return new Promise((resolve, reject) => {
-            mongoose.connect(DATABASE_ADDRESS, connectionOptions)
-                .then(client => {
-                    console.log("---- Connected to database ----");
-                    resolve(client);
-                })
-                .catch(err => reject(err));
-        });
+        return mongoose.createConnection(DATABASE_ADDRESS, connectionOptions);
     },
     /**
      * @method dbConnector.disconnectFromDB - disconnects client from database
-     * @param {Object} client - the connection MongoDB driver needs to close (via Mongoose) 
+     * @param {Object} conn - the connection MongoDB driver needs to close (via Mongoose) 
      * @returns {Object} - a Promise
      */
-    disconnectFromDB (client) {
-        return new Promise((resolve, reject) => {
-            mongoose.close(client)
-                .then(() => {
-                    console.log("---- Database connection closed ----");
-                    resolve();
-                })
-                .catch(err => reject(err));
-        });
+    disconnectFromDB (conn) {
+        return conn.close();
     }
 };

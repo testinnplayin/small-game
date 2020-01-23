@@ -14,7 +14,7 @@
 const http = require("http");
 
 /** @constant {Object} app - @see module:app */
-const app = require("./app");
+const { app } = require("./app");
 
 /** @constant {Object} config - @see module:config configuration module */
 const config = require("./config");
@@ -22,6 +22,9 @@ const PORT = config.port;
 
 const server = http.createServer(app);
 
-server.listen(PORT, () => {
+server.listen(PORT, err => {
+    if (err) {
+        console.error(`[ERROR] Problem while trying to launch server ${err}`);
+    }
     console.log(`---- Server listening on port ${PORT} ----`);
 });
